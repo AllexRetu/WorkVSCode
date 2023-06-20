@@ -48,8 +48,8 @@ std::pair<Matrix, Matrix> compactGauss(Matrix const & A)
 {
 	size_t m = A.size();
     size_t n = A.at(0).size();
-    if (n < m) // система переопределена
-        return std::pair<Matrix,Matrix>();
+    if (n < m) // система переопределена 
+        m = n; // возьмем верхную квадратную подматрицу
 	Matrix LU(m, std::vector<double>(n));
 	
 	for (int k = 0; k < m; ++k)
@@ -59,6 +59,8 @@ std::pair<Matrix, Matrix> compactGauss(Matrix const & A)
 			LU[i][k] = A[i][k];
 			for (int i1 = 0; i1 < k; ++i1)
 				LU[i][k] -= LU[i][i1]*LU[i1][k];
+            if (std::abs(LU[i][i]) <= 1e-10) // Матрица системы вырожденная
+                return std::pair<Matrix, Matrix>();
 		}
 		for (int j = k + 1; j < m; ++j) // Вычисление C - верхнетреугольной
 		{
@@ -121,7 +123,7 @@ Matrix proof(Matrix const & matrix) // функция проверяет пра�
     return product(L,U);
 }
 
-Matrix inverse(Matrix const & matrix)
+Matrix inverse(Matrix const & matrix) // считает обратную
 {
     size_t n = matrix.size();
 
@@ -148,6 +150,9 @@ double determinant(Matrix matrix)
     if (n != matrix.at(0).size())
         return 1./0.; // матрица не квадратная
     Matrix LU = compactGauss(matrix).second;
+
+    if (LU == Matrix())
+        return 0;
 
     double det = 1;
 

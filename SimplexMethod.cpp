@@ -14,7 +14,7 @@ int main()
     {
         {1,2,3,},
         {3,2,1,},
-        {2,2,1,},
+        {2,2,2,},
         /*{1,-4,-7,1,4,0},
         {6,0,1,1,1,1},
         {0,9,11,2,0,1}*/
@@ -26,8 +26,6 @@ int main()
         {1,2}
     };
 
-    
-    //printMatrix(inverse(A));
-
     cout << determinant(A) << endl;
+    //printMatrix(compactGauss(A).first);
 }
