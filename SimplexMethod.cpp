@@ -144,7 +144,20 @@ Matrix inverse(Matrix const & matrix)
     return compactGauss(expand).first; // решаем n систем которые дают нам столбцы обратной матрицы
 }                                                   // first - это матрица из столбцов-решений систем, т.е. это и есть обратная
 
+double determinant(Matrix matrix)
+{
+    size_t n = matrix.size();
+    if (n != matrix.at(0).size())
+        return 1./0.; // матрица не квадратная
+    Matrix LU = compactGauss(matrix).second;
 
+    double det = 1;
+
+    for (int i = 0; i < n; ++i)
+        det *= LU[i][i];
+    
+    return det;
+}
 
 int main()
 {
@@ -152,7 +165,7 @@ int main()
     {
         {1,2,3,},
         {3,2,1,},
-        {2,2,0,},
+        {2,2,1,},
         /*{1,-4,-7,1,4,0},
         {6,0,1,1,1,1},
         {0,9,11,2,0,1}*/
@@ -165,5 +178,7 @@ int main()
     };
 
     
-    printMatrix(inverse(A));
+    //printMatrix(inverse(A));
+
+    cout << determinant(A) << endl;
 }
