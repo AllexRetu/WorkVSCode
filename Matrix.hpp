@@ -54,15 +54,15 @@ std::pair<Matrix, Matrix> compactGauss(Matrix const & A)
 	
 	for (int k = 0; k < m; ++k)
 	{
-		for (int i = k; i < m; ++i) // Вычисление B - нижнетреугольной
+		for (int i = k; i < m; ++i) // вычисление B - нижнетреугольной
 		{
 			LU[i][k] = A[i][k];
 			for (int i1 = 0; i1 < k; ++i1)
 				LU[i][k] -= LU[i][i1]*LU[i1][k];
-            if (std::abs(LU[i][i]) <= 1e-10) // Матрица системы вырожденная
-                return std::pair<Matrix, Matrix>();
 		}
-		for (int j = k + 1; j < m; ++j) // Вычисление C - верхнетреугольной
+        if (std::abs(LU[k][k]) <= 1e-12) // матрица системы вырожденная
+                return std::pair<Matrix, Matrix>();
+		for (int j = k + 1; j < m; ++j) // вычисление C - верхнетреугольной
 		{
 			LU[k][j] = A[k][j];
 			for (int j1 = 0; j1 < k; ++j1)
@@ -76,7 +76,7 @@ std::pair<Matrix, Matrix> compactGauss(Matrix const & A)
 
 	Matrix X(m, std::vector<double>(n-m));
 
-    for (int j = m; j < n; ++j) // Просчитываем C для всех стобцов правых частей
+    for (int j = m; j < n; ++j) // просчитываем C для всех стобцов правых частей
     {
         for (int i = 0; i < m; ++i)
         {
@@ -87,13 +87,13 @@ std::pair<Matrix, Matrix> compactGauss(Matrix const & A)
         }
     }
 
-	for (int k = 0; k < n-m; ++k) // Вычисление решений
+	for (int k = 0; k < n-m; ++k) // вычисление решений
     {
         for (int i = m-1; i >= 0; --i)
         {
             X[i][k] = LU[i][m+k];
             for (int j = m-1; j > i; --j)
-                X[i][k] -= X[j][k]*LU[i][j];
+                X[i][k] -= LU[i][j]*X[j][k];
         }
     }
 
@@ -144,7 +144,7 @@ Matrix inverse(Matrix const & matrix) // считает обратную
     return compactGauss(expand).first; // решаем n систем которые дают нам столбцы обратной матрицы
 }                                                   // first - это матрица из столбцов-решений систем, т.е. это и есть обратная
 
-double determinant(Matrix matrix)
+double det(Matrix matrix) // считает определитель матрицы
 {
     size_t n = matrix.size();
     if (n != matrix.at(0).size())
