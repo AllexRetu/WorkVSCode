@@ -73,6 +73,16 @@ Matrix operator+(Matrix const & A, Matrix const & B)
     return add(A, B);
 }
 
+Matrix operator-(Matrix const& A, Matrix const& B)
+{
+    Matrix C = B;
+    for (auto col : C)
+        for (double item : col)
+            item = -item;
+    return add(A, C);
+}
+
+
 Matrix multipl(double a, Matrix const & A)  // умножение матрицы на скаляр
 {
     size_t m = A.size();
@@ -219,7 +229,7 @@ double det(Matrix matrix) // считает определитель матри�
 {
     size_t n = matrix.size();
     if (n != matrix.at(0).size())   // матрица не квадратная
-        return 1./0.;
+        return INT_MAX;
     Matrix LU = compactGauss(matrix).second;
 
     if (LU == Matrix())

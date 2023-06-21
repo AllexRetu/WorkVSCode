@@ -7,6 +7,25 @@
 
 using namespace std;
 
+
+pair<double, int> min(Matrix& E, Matrix const& b, Matrix & A_index_col, vector<int>& I)
+{
+    double min = ((inverse(E) * b)[0][0]) / (inverse(E) * A_index_col)[0][0];
+    int p = 0;
+    for (int i = 1; i < I.size(); ++i)
+    {
+        double cur = ((inverse(E) * b)[0][i]) / (inverse(E) * A_index_col)[0][i];
+        if (cur < min)
+        {
+            min = cur;
+            p = i;
+        }
+    }
+    return make_pair(min, p);
+}
+
+
+
 pair<double, Matrix> simplexMethod(Matrix const & A, Matrix const & b, Matrix const & c)    // A - матрица m x n
 {                                                                                                   // b - столбец
     size_t m = A.size();                                                                            // c - строка
@@ -31,19 +50,74 @@ pair<double, Matrix> simplexMethod(Matrix const & A, Matrix const & b, Matrix co
     cout << A_ << endl;
     cout << c_ << endl;
 
-    Matrix X = createMatrix(n+m,1);
+    Matrix X = createMatrix(1, m + n);   // столбец размерности m + n (в А_ m + n столбцов)
+    Matrix XB = createMatrix(1, m);
+    Matrix XN = createMatrix(1, n);
+    for (int j = 0; j < m + n; ++j)
+        X[0][j] = j;    // X - столбец индексов
 
+    for (int j = 0; j < m + n; ++j)
+    {
+        if (j < m)
+            XB[0][j] = b[0][j];
+        else
+            XN[0][j - m] = 0;
+    }
+    Matrix Xval = createMatrix(1, m + n);
     
+    for (int j = 0; j < m + n; ++j)
+        Xval[0][j] = j<m ? b[0][j] : 0; // Xval - столбец значений, элементы после m-го равны 0 (по алгоритму)
 
+    Matrix c_copy = c;
+    Matrix A_copy = A;
 
+    //хз какое должно быть условие выхода
+    while (true)
+    {
+        int index;
+        // пункт 1
+        for (int i = 0; i < m; ++i)
+        {
+            if ((c1 * inverse(E) * A_copy - c_copy)[i][0] < 0) // если все компоненты этого выражения > 0 то мы нашли оптимальный результат (см стр.2 низ)
+            {
+                index = i; // запомнили индекс компоненты < 0
+                break;
+            }
+            return make_pair((c_copy * Xval)[0][0], X);
+        }
 
+        // пункт 2a
+        
+        Matrix A_index_col = createMatrix(1, m);
+        A_index_col[0] = A_copy[index];
+        vector<int> I;
+        for (int i = 0; i < m; ++i)
+            if ((inverse(E) * A_index_col)[0][i] > 0) // если все компоненты данного выражения > 0, то такой индекс добавляем в I
+                I.push_back(i);
+        if (I.empty()) // если таких индексов нет, то опт. результат = +infinity (см стр. 3)
+            return make_pair(INT_MAX, Xval);
+        
+        // пункт 2b
 
+        pair<double, int> min_res = min(E, b, A_index_col, I);
+        XN[0][index] = min_res.first; // изсенили компоненту по формуле 3 (см стр. 4)
+        int p = min_res.second; // запомнили индекс, на котором достигается минимум
 
+        // переход к новой базисной матрице (см стр. 4)
 
+        vector<double> for_swap = E[p];
+        E[p] = A[index];
+        A_copy[index] = for_swap;
 
+        double x_swap = XB[0][p];
+        XB[0][p] = XN[0][index];
+        XN[0][index] = x_swap;
 
+        Xval = (XB | XN);
+    }
 
-    return pair<double, Matrix>();
+    return make_pair((c_ * Xval)[0][0], Xval);
+    //return pair<double, Matrix>();
 }
 
 int main()
