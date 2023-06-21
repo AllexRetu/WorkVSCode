@@ -6,6 +6,11 @@
 using Matrix = std::vector<std::vector<double>>;
 
 
+Matrix createMatrix(size_t m, size_t n)   // создает матрицу нулей размера m x n
+{
+    return Matrix(m, std::vector<double>(n));
+}
+
 void printMatrix(Matrix const & matrix, std::string name)
 {
 	std::cout << name << ": " << std::endl;
@@ -46,25 +51,68 @@ std::ostream & operator<<(std::ostream & os, Matrix const & matrix)
     return os;
 }
 
-Matrix product(Matrix const & matrix1, Matrix const & matrix2)
+Matrix add(Matrix const & A, Matrix const & B)  // сумма матриц
 {
-    size_t n = matrix2.at(0).size();
-    size_t m = matrix1.size();
-    size_t p = matrix1.at(0).size();
-    if (p != matrix2.size()) // размеры не совместны
+    size_t m = A.size();
+    size_t n = A.at(0).size();
+
+    if (m != B.size() || n != B.at(0).size())   // размеры несовместны
         return Matrix();
-    Matrix product = Matrix(m, std::vector<double>(n));
+
+    Matrix C = createMatrix(m,n);
+
+    for (int i = 0; i < m; ++i)
+        for (int j = 0; j < n; ++j)
+            C[i][j] = A[i][j] + B[i][j];
+    
+    return C;
+}
+
+Matrix operator+(Matrix const & A, Matrix const & B)
+{
+    return add(A, B);
+}
+
+Matrix multipl(double a, Matrix const & A)  // умножение матрицы на скаляр
+{
+    size_t m = A.size();
+    size_t n = A.at(0).size();
+
+    Matrix C = createMatrix(m,n);
+
+    for (int i = 0; i < m; ++i)
+        for (int j = 0; j < n; ++j)
+            C[i][j] = a*A[i][j];
+
+    return C;
+}
+
+Matrix operator*(double a, Matrix const & A)
+{
+    return multipl(a, A);
+}
+
+Matrix product(Matrix const & A, Matrix const & B)  // произведение матриц
+{
+    size_t m = A.size();
+    size_t n = B.at(0).size();
+    size_t p = A.at(0).size();
+
+    if (p != B.size()) // размеры несовместны
+        return Matrix();
+
+    Matrix C = createMatrix(m,n);
 
     for (int i = 0; i < m; ++i)
         for (int j = 0; j < n; ++j)
             for (int k = 0; k < p; ++k)
-                product[i][j] += matrix1[i][k]*matrix2[k][j];
-    return product;
+                C[i][j] += A[i][k]*B[k][j];
+    return C;
 }
 
-Matrix operator*(Matrix const & matrix1, Matrix const & matrix2)
+Matrix operator*(Matrix const & A, Matrix const & B)
 {
-    return product(matrix1, matrix2);
+    return product(A, B);
 }
 
 std::pair<Matrix, Matrix> compactGauss(Matrix const & A)
@@ -73,7 +121,7 @@ std::pair<Matrix, Matrix> compactGauss(Matrix const & A)
     size_t n = A.at(0).size();
     if (n < m) // система переопределена 
         m = n; // возьмем верхную квадратную подматрицу
-	Matrix LU(m, std::vector<double>(n));
+	Matrix LU = createMatrix(m,n);
 	
 	for (int k = 0; k < m; ++k)
 	{
@@ -97,7 +145,7 @@ std::pair<Matrix, Matrix> compactGauss(Matrix const & A)
     if (n == m) // LU-разложение без решения системы
         return make_pair(Matrix(), LU);
 
-	Matrix X(m, std::vector<double>(n-m));
+	Matrix X = createMatrix(m,n-m);
 
     for (int j = m; j < n; ++j) // просчитываем C для всех стобцов правых частей
     {
@@ -126,20 +174,20 @@ std::pair<Matrix, Matrix> compactGauss(Matrix const & A)
 
 Matrix proof(Matrix const & matrix) // функция проверяет правильность LU-разложения
 {
-    size_t n = matrix.size();
+    size_t m = matrix.size();
     auto T = compactGauss(matrix);
-    Matrix L = Matrix(n, std::vector<double>(n,0));
+    Matrix L = createMatrix(m,m);
 
-    for (int j = 0; j < n; ++j)
-        for (int i = j; i < n; ++i)
+    for (int j = 0; j < m; ++j)
+        for (int i = j; i < m; ++i)
             L[i][j] = T.second[i][j];
 
-    Matrix U = Matrix(n, std::vector<double>(n,0));
+    Matrix U = createMatrix(m,m);
 
-    for (int i = 0; i < n; ++i)
+    for (int i = 0; i < m; ++i)
     {
         U[i][i] = 1;
-        for (int j = i + 1; j < n; ++j)
+        for (int j = i + 1; j < m; ++j)
             U[i][j] = T.second[i][j];
     }
 
@@ -153,9 +201,9 @@ Matrix inverse(Matrix const & matrix) // считает обратную
     if (n != matrix.at(0).size()) // матрица не квадратная(не хочу такую обращать)
         return Matrix();
 
-    Matrix expand = Matrix(n, std::vector<double>(2*n));
+    Matrix expand = createMatrix(n,2*n);
 
-    for (int i = 0; i < n; ++i) // припписываем единичную матрицу справа к той, которую обращаем
+    for (int i = 0; i < n; ++i) // приписываем единичную матрицу справа к той, которую обращаем
     {
         for (int j = 0; j < n; ++j)
         {
@@ -170,8 +218,8 @@ Matrix inverse(Matrix const & matrix) // считает обратную
 double det(Matrix matrix) // считает определитель матрицы
 {
     size_t n = matrix.size();
-    if (n != matrix.at(0).size())
-        return 1./0.; // матрица не квадратная
+    if (n != matrix.at(0).size())   // матрица не квадратная
+        return 1./0.;
     Matrix LU = compactGauss(matrix).second;
 
     if (LU == Matrix())
@@ -185,18 +233,18 @@ double det(Matrix matrix) // считает определитель матри�
     return det;
 }
 
-Matrix transpos(Matrix const & matrix) // транспонирование матриц
+Matrix transpos(Matrix const & A) // транспонирование матриц
 {
-    size_t m = matrix.size();
-    size_t n = matrix.at(0).size();
+    size_t m = A.size();
+    size_t n = A.at(0).size();
 
-    Matrix transpos = Matrix(n, std::vector<double>(m));
+    Matrix tA = createMatrix(n,m);
 
     for (int i = 0; i < m; ++i)
         for (int j = 0; j < n; ++j)
-            transpos[j][i] = matrix[i][j];
+            tA[j][i] = A[i][j];
 
-    return transpos;
+    return tA;
 }
 
 Matrix join(Matrix const & matrix1, Matrix const & matrix2) // join(A,B) = (A|B)
@@ -209,7 +257,7 @@ Matrix join(Matrix const & matrix1, Matrix const & matrix2) // join(A,B) = (A|B)
     if (m1 != m2)   // у матриц разная высота
         return Matrix();
     
-    Matrix joinMatrix = Matrix(m1, std::vector<double>(n1 + n2));
+    Matrix joinMatrix = createMatrix(m1,n1+n2);
     
     for (int i = 0; i < m1; ++i)
     {
