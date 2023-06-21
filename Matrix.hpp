@@ -233,7 +233,7 @@ double det(Matrix matrix) // считает определитель матри�
     return det;
 }
 
-Matrix transpos(Matrix const & A) // транспонирование матриц
+Matrix transpos(Matrix const & A)   // транспонирование матриц
 {
     size_t m = A.size();
     size_t n = A.at(0).size();
@@ -247,35 +247,35 @@ Matrix transpos(Matrix const & A) // транспонирование матри
     return tA;
 }
 
-Matrix join(Matrix const & matrix1, Matrix const & matrix2) // join(A,B) = (A|B)
+Matrix join(Matrix const & A, Matrix const & B) // join(A,B) = (A|B) = C
 {
-    size_t m1 = matrix1.size();
-    size_t m2 = matrix2.size();
-    size_t n1 = matrix1.at(0).size();
-    size_t n2 = matrix2.at(0).size();
+    size_t m1 = A.size();
+    size_t m2 = B.size();
+    size_t n1 = A.at(0).size();
+    size_t n2 = B.at(0).size();
 
     if (m1 != m2)   // у матриц разная высота
         return Matrix();
     
-    Matrix joinMatrix = createMatrix(m1,n1+n2);
+    Matrix C = createMatrix(m1,n1+n2);
     
     for (int i = 0; i < m1; ++i)
     {
         for (int j = 0; j < n1; ++j)
-            joinMatrix[i][j] = matrix1[i][j];
+            C[i][j] = A[i][j];
         for (int j = 0; j < n2; ++j)
-            joinMatrix[i][n1 + j] = matrix2[i][j];
+            C[i][n1 + j] = B[i][j];
     }
 
-    return joinMatrix;
+    return C;
 }
 
-Matrix operator|(Matrix const & A, Matrix const & B) // теперь помжно писать A|B
+Matrix operator|(Matrix const & A, Matrix const & B)    // теперь помжно писать A|B
 {
     return join(A,B);
 }
 
-Matrix perCol(Matrix const & matrix, size_t k, size_t p) // перестановка столбцов в матрице
+Matrix perCol(Matrix const & matrix, size_t k, size_t p)    // перестановка столбцов в матрице
 {
     size_t m = matrix.size();
     size_t n = matrix.at(0).size();
@@ -290,9 +290,32 @@ Matrix perCol(Matrix const & matrix, size_t k, size_t p) // перестанов
     return newMatrix;
 }
 
-Matrix perRow(Matrix const & matrix, size_t k, size_t p) // перестановка строк в матрице
+Matrix perRow(Matrix const & matrix, size_t k, size_t p)    // перестановка строк в матрице
 {
     Matrix newMatrix = matrix;
     swap(newMatrix.at(k),newMatrix.at(p));
     return newMatrix;
+}
+
+
+std::pair<Matrix,Matrix> disjoin(Matrix const & C, size_t p) // разъделяет матрицу на две
+{                                                           // в одной левые столбцы, в другой правые C = (A|B) -> A,B
+    size_t m = C.size();
+    size_t n = C.at(0).size();
+
+    if (p > n)    // просят разделить на матрицы большего размера чем исходная
+        return std::pair<Matrix,Matrix>();
+    
+    Matrix A = createMatrix(m, p);
+    Matrix B = createMatrix(m, n-p);
+
+    for (int i = 0; i < m; ++i)
+    {
+        for (int j = 0; j < p; ++j)
+            A[i][j] = C[i][j];
+        for (int j = 0; j < n-p; ++j)
+            B[i][j] = C[i][p+j];
+    }
+
+    return make_pair(A,B);
 }
