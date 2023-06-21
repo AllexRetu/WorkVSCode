@@ -185,7 +185,7 @@ double det(Matrix matrix) // считает определитель матри�
     return det;
 }
 
-Matrix transpos(Matrix const & matrix)
+Matrix transpos(Matrix const & matrix) // транспонирование матриц
 {
     size_t m = matrix.size();
     size_t n = matrix.at(0).size();
@@ -199,7 +199,7 @@ Matrix transpos(Matrix const & matrix)
     return transpos;
 }
 
-Matrix join(Matrix const & matrix1, Matrix const & matrix2)
+Matrix join(Matrix const & matrix1, Matrix const & matrix2) // join(A,B) = (A|B)
 {
     size_t m1 = matrix1.size();
     size_t m2 = matrix2.size();
