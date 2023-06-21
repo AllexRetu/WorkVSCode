@@ -54,7 +54,7 @@ pair<double, Matrix> simplexMethod(Matrix const & A, Matrix const & b, Matrix co
     Matrix XB = createMatrix(1, m);
     Matrix XN = createMatrix(1, n);
     for (int j = 0; j < m + n; ++j)
-        X[0][j] = j;    // X - столбец индексов
+        X[0][j] = j;    // X - столбец индексов, хз вроде он и не пригодился
 
     for (int j = 0; j < m + n; ++j)
     {
@@ -63,18 +63,18 @@ pair<double, Matrix> simplexMethod(Matrix const & A, Matrix const & b, Matrix co
         else
             XN[0][j - m] = 0;
     }
-    Matrix Xval = createMatrix(1, m + n);
-    
+    //Matrix Xval = createMatrix(1, m + n);
+    /*
     for (int j = 0; j < m + n; ++j)
         Xval[0][j] = j<m ? b[0][j] : 0; // Xval - столбец значений, элементы после m-го равны 0 (по алгоритму)
-
+    */
     Matrix c_copy = c;
     Matrix A_copy = A;
 
     //хз какое должно быть условие выхода
     while (true)
     {
-        int index;
+        int index = -1;
         // пункт 1
         for (int i = 0; i < m; ++i)
         {
@@ -83,8 +83,9 @@ pair<double, Matrix> simplexMethod(Matrix const & A, Matrix const & b, Matrix co
                 index = i; // запомнили индекс компоненты < 0
                 break;
             }
-            return make_pair((c_copy * Xval)[0][0], X);
         }
+        if(index == -1)
+            return make_pair((c_copy * (XB|XN))[0][0], (XB|XN));
 
         // пункт 2a
         
@@ -95,7 +96,7 @@ pair<double, Matrix> simplexMethod(Matrix const & A, Matrix const & b, Matrix co
             if ((inverse(E) * A_index_col)[0][i] > 0) // если все компоненты данного выражения > 0, то такой индекс добавляем в I
                 I.push_back(i);
         if (I.empty()) // если таких индексов нет, то опт. результат = +infinity (см стр. 3)
-            return make_pair(INT_MAX, Xval);
+            return make_pair(INT_MAX, XB|XN);
         
         // пункт 2b
 
@@ -112,11 +113,9 @@ pair<double, Matrix> simplexMethod(Matrix const & A, Matrix const & b, Matrix co
         double x_swap = XB[0][p];
         XB[0][p] = XN[0][index];
         XN[0][index] = x_swap;
-
-        Xval = (XB | XN);
     }
 
-    return make_pair((c_ * Xval)[0][0], Xval);
+    return make_pair((c_ * (XB|XN))[0][0], XB|XN);
     //return pair<double, Matrix>();
 }
 
