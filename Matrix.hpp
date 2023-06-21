@@ -206,7 +206,7 @@ Matrix join(Matrix const & matrix1, Matrix const & matrix2) // join(A,B) = (A|B)
     size_t n1 = matrix1.at(0).size();
     size_t n2 = matrix2.at(0).size();
 
-    if (m1 != m2)
+    if (m1 != m2)   // у матриц разная высота
         return Matrix();
     
     Matrix joinMatrix = Matrix(m1, std::vector<double>(n1 + n2));
@@ -216,8 +216,35 @@ Matrix join(Matrix const & matrix1, Matrix const & matrix2) // join(A,B) = (A|B)
         for (int j = 0; j < n1; ++j)
             joinMatrix[i][j] = matrix1[i][j];
         for (int j = 0; j < n2; ++j)
-            joinMatrix[i][j] = matrix2[i][j];
+            joinMatrix[i][n1 + j] = matrix2[i][j];
     }
 
     return joinMatrix;
+}
+
+Matrix operator|(Matrix const & A, Matrix const & B) // теперь помжно писать A|B
+{
+    return join(A,B);
+}
+
+Matrix perCol(Matrix const & matrix, size_t k, size_t p) // перестановка столбцов в матрице
+{
+    size_t m = matrix.size();
+    size_t n = matrix.at(0).size();
+
+    Matrix newMatrix = matrix;
+    for (int i = 0; i < m; ++i)
+    {
+        newMatrix[i][k] = matrix[i][p];
+        newMatrix[i][p] = matrix[i][k];
+    }
+
+    return newMatrix;
+}
+
+Matrix perRow(Matrix const & matrix, size_t k, size_t p) // перестановка строк в матрице
+{
+    Matrix newMatrix = matrix;
+    swap(newMatrix.at(k),newMatrix.at(p));
+    return newMatrix;
 }
