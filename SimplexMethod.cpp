@@ -26,6 +26,6 @@ int main()
         {1,2}
     };
 
-    cout << det(A) << endl;
-    //printMatrix(compactGauss(A).first);
+    //cout << det(A) << endl;
+    cout << A << endl;
 }

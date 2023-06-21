@@ -5,6 +5,7 @@
 
 using Matrix = std::vector<std::vector<double>>;
 
+
 void printMatrix(Matrix const & matrix, std::string name)
 {
 	std::cout << name << ": " << std::endl;
@@ -28,6 +29,23 @@ void printMatrix(Matrix const & matrix)
 	std::cout << '\n';
 }
 
+void printMatrix(Matrix const & matrix, std::ostream & os)
+{
+	for (int i = 0; i < matrix.size(); ++i)
+	{
+		for (int j = 0; j < matrix.at(i).size(); ++j)
+			os << matrix[i][j] << " ";
+		os << '\n';
+	}
+	os << '\n';
+}
+
+std::ostream & operator<<(std::ostream & os, Matrix const & matrix)
+{
+    printMatrix(matrix, os);
+    return os;
+}
+
 Matrix product(Matrix const & matrix1, Matrix const & matrix2)
 {
     size_t n = matrix2.at(0).size();
@@ -42,6 +60,11 @@ Matrix product(Matrix const & matrix1, Matrix const & matrix2)
             for (int k = 0; k < p; ++k)
                 product[i][j] += matrix1[i][k]*matrix2[k][j];
     return product;
+}
+
+Matrix operator*(Matrix const & matrix1, Matrix const & matrix2)
+{
+    return product(matrix1, matrix2);
 }
 
 std::pair<Matrix, Matrix> compactGauss(Matrix const & A)
@@ -160,4 +183,41 @@ double det(Matrix matrix) // считает определитель матри�
         det *= LU[i][i];
     
     return det;
+}
+
+Matrix transpos(Matrix const & matrix)
+{
+    size_t m = matrix.size();
+    size_t n = matrix.at(0).size();
+
+    Matrix transpos = Matrix(n, std::vector<double>(m));
+
+    for (int i = 0; i < m; ++i)
+        for (int j = 0; j < n; ++j)
+            transpos[j][i] = matrix[i][j];
+
+    return transpos;
+}
+
+Matrix join(Matrix const & matrix1, Matrix const & matrix2)
+{
+    size_t m1 = matrix1.size();
+    size_t m2 = matrix2.size();
+    size_t n1 = matrix1.at(0).size();
+    size_t n2 = matrix2.at(0).size();
+
+    if (m1 != m2)
+        return Matrix();
+    
+    Matrix joinMatrix = Matrix(m1, std::vector<double>(n1 + n2));
+    
+    for (int i = 0; i < m1; ++i)
+    {
+        for (int j = 0; j < n1; ++j)
+            joinMatrix[i][j] = matrix1[i][j];
+        for (int j = 0; j < n2; ++j)
+            joinMatrix[i][j] = matrix2[i][j];
+    }
+
+    return joinMatrix;
 }
