@@ -7,6 +7,12 @@
 
 using namespace std;
 
+pair<double, vector<double>> simplexMethod(Matrix const & A, Matrix const & b, Matrix const & c)
+{
+    
+
+    return pair<double, vector<double>>();
+}
 
 int main()
 {
@@ -27,5 +33,5 @@ int main()
     };
 
     //cout << det(A) << endl;
-    cout << A << endl;
+    cout << perRow(A,0,1) << endl;
 }
