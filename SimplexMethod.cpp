@@ -15,9 +15,12 @@ int min(Matrix const & invB, Matrix const & b, Matrix const & colIndexNegativeN,
     Matrix M2 = invB * colIndexNegativeN;
     double min = M1[I.at(0)][0] / M2[I.at(0)][0];
     int p = I.at(0);
+    cout << "Min:" << endl;
+    cout << min << endl;
     for (int i = 1; i < I.size(); ++i)
     {
         double cur = M1[I[i]][0] / M2[I[i]][0];
+        cout << cur << endl;
         if (cur < min)
         {
             min = cur;
@@ -114,6 +117,9 @@ pair<double, Matrix> simplexMethod(Matrix const & A, Matrix const & b, Matrix co
         cout << "B^-1:" << endl;
         cout << invB << endl;
 
+        cout << "B^-1*N" << endl;
+        cout << invB*N << endl;
+
         if (invB == Matrix())
             return pair<double, Matrix>();
 
@@ -123,9 +129,10 @@ pair<double, Matrix> simplexMethod(Matrix const & A, Matrix const & b, Matrix co
         cout << "d:" << endl;
         cout << d << endl;
 
+        double minJ = 0;
         // пункт 1
-        for (int i = 0; i < d.size(); ++i)
-        {
+        for (int i = 0; i < d[0].size(); ++i)
+        {   
             if (d[0][i] < 0) // если все компоненты этого выражения > 0 то мы нашли оптимальный результат (см стр.2 низ)
             {
                 indexNegative = i; // запомнили индекс компоненты < 0 (ее будем изменять)
@@ -186,12 +193,12 @@ int main()
     b
     {
         {1,},
-        {0,},
+        {4,},
         {1,}
     },
     c
     {
-        {5,6,-1,6},
+        {5,6,1,6},
     };
 
     /*cout << det(A) << endl;
@@ -214,4 +221,8 @@ int main()
 
     cout << "Максимум" << endl;
     cout << T.first << endl;
+
+    Matrix A1 = disjoin(perCol(A,1,3),3).first;
+
+    cout << compactGauss((A1|b)).first << endl;
 }
