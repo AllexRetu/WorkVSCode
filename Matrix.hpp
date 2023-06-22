@@ -75,11 +75,7 @@ Matrix operator+(Matrix const & A, Matrix const & B)
 
 Matrix operator-(Matrix const& A, Matrix const& B)
 {
-    Matrix C = B;
-    for (auto col : C)
-        for (double item : col)
-            item = -item;
-    return add(A, C);
+    return add(A, (-1)*B);
 }
 
 
