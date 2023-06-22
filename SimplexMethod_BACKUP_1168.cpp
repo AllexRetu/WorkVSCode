@@ -41,7 +41,7 @@ pair<double, Matrix> ret(Matrix const & invB, Matrix const & b, Matrix const & c
     size_t cSize = c_.at(0).size();
     Matrix X = createMatrix(cSize, 1);  // это все компоненты (пока с искусственными)
 
-   for (int i = 0; i < m; ++i) // переставляем иксы на изначальное место
+    for (int i = 0; i < m; ++i) // переставляем иксы на изначальное место
         X[indexX[i]][0] = XB[i][0];
 
     Matrix c = createMatrix(1, cSize);
@@ -232,7 +232,7 @@ int main()
     
     auto T = simplexMethod(A,b,c);
 
-
+<<<<<<< HEAD
     setlocale(LC_ALL, "Russian");
     cout << "Точка максимума" << endl;
     cout << T.second << endl;
@@ -241,4 +241,11 @@ int main()
     cout << T.first << endl;
 
     Matrix A1 = disjoin(perCol(A,1,3),3).first;
+=======
+    cout << "Точка максимума:" << endl;
+    cout << T.second;
+>>>>>>> 37c355384b7cf79ff1609e15de648e25db519961
+
+    cout << "Максимум:" << endl;
+    cout << T.first;
 }
