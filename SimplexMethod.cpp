@@ -196,7 +196,6 @@ pair<double, Matrix> simplexMethod(Matrix const & A, Matrix const & b, Matrix co
 
 int main()
 {
-
     Matrix A
     {
         {1,2,3,3},  // A
@@ -217,6 +216,26 @@ int main()
 
     };
 
+    // система с результатом INT_MAX (+infinity)
+    Matrix A2
+    {
+        {1,-1,1,1},  // A
+        {1,-1,1,1},
+        {1,-1,1,1},
+
+    },
+    b2
+    {
+        {1,},   // b
+        {4,},
+        {1,},
+
+    },
+    c2
+    {
+        {1,1,1,1},  // с
+
+    };
     /*cout << det(A) << endl;
     cout << perRow(A,0,1) << endl;
 
@@ -230,15 +249,18 @@ int main()
     cout << disjoin(C,3).first << endl;
     cout << disjoin(C,3).second << endl;*/
     
-    auto T = simplexMethod(A,b,c);
+    auto T = simplexMethod(A2,b2,c2);
 
-
+    
     setlocale(LC_ALL, "Russian");
     cout << "Точка максимума" << endl;
     cout << T.second << endl;
 
     cout << "Максимум" << endl;
-    cout << T.first << endl;
+    if (T.first != INT_MAX)
+        cout << T.first << endl;
+    else
+        cout << "+ бесконечность" << endl;
 
     Matrix A1 = disjoin(perCol(A,1,3),3).first;
 }
