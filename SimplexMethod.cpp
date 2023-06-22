@@ -181,6 +181,7 @@ pair<double, Matrix> simplexMethod(Matrix const & A, Matrix const & b, Matrix co
 
 int main()
 {
+
     Matrix A
     {
         {1,2,3,3},
@@ -216,6 +217,7 @@ int main()
     
     auto T = simplexMethod(A,b,c);
 
+    setlocale(LC_ALL, "Russian");
     cout << "Точка максимума" << endl;
     cout << T.second << endl;
 
