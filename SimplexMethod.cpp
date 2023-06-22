@@ -28,7 +28,7 @@ int min(Matrix const & invB, Matrix const & b, Matrix const & colIndexNegativeN,
             p = I[i];
         }
     }
-    cout << endl;
+    cout << endl << endl;
     return p;
 }
 
@@ -164,14 +164,21 @@ pair<double, Matrix> simplexMethod(Matrix const & A, Matrix const & b, Matrix co
         for (int i = 0; i < m; ++i)
             if ((invB * colIndexNegativeN)[i][0] > 0) // если i-ая компонента > 0, то такой индекс добавляем в I
                 I.push_back(i);
-        if (I.empty()) // если таких индексов нет, то опт. результат = +infinity (см стр. 3)
-            return make_pair(INT_MAX, Matrix());
 
-        cout << "Номера столбцов из B, которые будут уменьшаться(I): " << endl;
+        if (I.empty()) // если таких индексов нет, то опт. результат = +infinity (см стр. 3)
+        {
+            cout << "Все компоненты XB будут неуменьшаться." << endl;
+            cout << "Конец алгоритма." << "\n\n";
+
+            return make_pair(INT_MAX, Matrix());
+        }
+
+        cout << "Номера компонент XB, которые будут уменьшаться(I): " << endl;
 
         for (int i = 0; i < I.size(); ++i)
             cout << I[i] + 1 << " ";
-        cout << endl << endl;
+        cout << endl;
+
         
         // пункт 2b
 
@@ -184,8 +191,8 @@ pair<double, Matrix> simplexMethod(Matrix const & A, Matrix const & b, Matrix co
 
         swap(indexX[p],indexX[m + indexNegative]);  // запоминаем как переставили координаты(стольцы)
 
-        cout << "Номер столбца из N который переставляем: " << indexNegative + 1 << endl;
-        cout << "Номер столбца из B который переставляем: " << p + 1 << endl << endl;
+        cout << "Номер столбца из N который переставляем(j): " << indexNegative + 1 << endl;
+        cout << "Номер столбца из B который переставляем(p): " << p + 1 << endl << endl;
 
         ++l;
     }
@@ -196,21 +203,21 @@ pair<double, Matrix> simplexMethod(Matrix const & A, Matrix const & b, Matrix co
 
 int main()
 {
-    Matrix A
+    Matrix A1
     {
         {1,2,3,3},  // A
         {3,10,1,4},
         {2,2,0,6},
         
     },
-    b
+    b1
     {
         {1,},   // b
         {4,},
         {1,},
 
     },
-    c
+    c1
     {
         {5,6,1,6},  // с
 
@@ -248,19 +255,58 @@ int main()
 
     cout << disjoin(C,3).first << endl;
     cout << disjoin(C,3).second << endl;*/
+
+
+    // Первые условия (существует конечный максимум)
+
+    cout << "Условия первой задачи: " << endl;
+    cout << "A:" << endl;
+    cout << A1 << endl;
+    cout << "b:" << endl;
+    cout << b1 << endl;
+    cout << "c" << endl;
+    cout << c1 << endl;
     
-    auto T = simplexMethod(A2,b2,c2);
+    auto T1 = simplexMethod(A1,b1,c1);
 
     
-    setlocale(LC_ALL, "Russian");
-    cout << "Точка максимума" << endl;
-    cout << T.second << endl;
+    if (T1.first != INT_MAX)
+    {
+        
+    cout << "Точка максимума: " << endl;
+    cout << T1.second;
 
-    cout << "Максимум" << endl;
-    if (T.first != INT_MAX)
-        cout << T.first << endl;
+    cout << "Максимум:" << endl;
+    cout << T1.first << endl << endl;
+    }
     else
-        cout << "+ бесконечность" << endl;
+        cout << "функция не ограничена, max = +бесконечность" << endl << endl;
 
-    Matrix A1 = disjoin(perCol(A,1,3),3).first;
+
+
+    // Вторые условия (максимум = +беск)
+
+    cout << "Условия второй задачи: " << endl;
+    cout << "A:" << endl;
+    cout << A2 << endl;
+    cout << "b:" << endl;
+    cout << b2 << endl;
+    cout << "c" << endl;
+    cout << c2 << endl;
+
+    auto T2 = simplexMethod(A2,b2,c2);
+
+    if (T2.first != INT_MAX)
+    {
+            
+    cout << "Точка максимума: " << endl;
+    cout << T2.second;
+
+    cout << "Максимум:" << endl;
+    cout << T2.first << endl;
+    }
+    else
+        cout << "функция не ограничена, max = +бесконечность" << endl;
+    
+
 }
