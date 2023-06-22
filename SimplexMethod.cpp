@@ -2,126 +2,174 @@
 #include <cmath>
 #include <vector>
 #include <string>
+#include <algorithm>
 
 #include "Matrix.hpp"
 
 using namespace std;
 
 
-pair<double, int> min(Matrix& E, Matrix const& b, Matrix & A_index_col, vector<int>& I)
+int min(Matrix const & invB, Matrix const & b, Matrix const & colIndexNegativeN, vector<int> const & I)   // функция ищет минимум из 2b формула (3)
 {
-    double min = ((inverse(E) * b)[0][0]) / (inverse(E) * A_index_col)[0][0];
-    int p = 0;
+    Matrix M1 = invB * b;
+    Matrix M2 = invB * colIndexNegativeN;
+    double min = M1[I.at(0)][0] / M2[I.at(0)][0];
+    int p = I.at(0);
     for (int i = 1; i < I.size(); ++i)
     {
-        double cur = ((inverse(E) * b)[i][0]) / (inverse(E) * A_index_col)[i][0];
+        double cur = M1[I[i]][0] / M2[I[i]][0];
         if (cur < min)
         {
             min = cur;
-            p = i;
+            p = I[i];
         }
     }
-    return make_pair(min, p);
+    return p;
+}
+
+
+pair<double, Matrix> ret(Matrix const & invB, Matrix const & b, Matrix const & c_, vector<int> const & indexX)  // функция расчитывает оптимальное решение(вывод для simplexMethod) по B,b и c
+{
+    size_t m = invB.size();
+
+    Matrix XB = invB * b;   // считаем ненулевые компоненты решения
+    size_t cSize = c_.at(0).size();
+    Matrix X = createMatrix(cSize, 1);  // это все компоненты (пока с искусственными)
+
+    for (int j = 0; j < m; ++j)
+        X[indexX[j]][0] = XB[j][0];
+
+    return make_pair((c_*X).at(0).at(0), X);
 }
 
 
 
 pair<double, Matrix> simplexMethod(Matrix const & A, Matrix const & b, Matrix const & c)    // A - матрица m x n
-{                                                                                                   // b - столбец
-    size_t m = A.size();                                                                            // c - строка
+{                                                                                           // b - столбец n x 1
+    size_t m = A.size();                                                                    // c - строка 1 x m
     size_t n = A.at(0).size();
 
     if (c.size() != 1 || b.at(0).size() != 1 || m != b.size() || n != c.at(0).size()) // проверка на корректность данных
         return pair<double, Matrix>();
 
+
+    // Выбор начального приближения
+
+    
     Matrix E = createMatrix(m,m);   // создаем единичную матрицу
     for (int i = 0; i < m; ++i)
         for(int j = 0; j < m; ++j)
             E[i][j] = i == j ? 1 : 0;
-
+    
     Matrix A_ = (E|A);
 
     Matrix c1 = createMatrix(1,m);  // создем новый показатель качества
     for (int i = 0; i < m; ++i)
-        c1[0][i] = -1e+5;   // -10^5
+        c1[0][i] = -1e+2;   // -10^2
 
     Matrix c_ = (c1|c);
+    
 
-    cout << A_ << endl;
-    cout << c_ << endl;
-
-    Matrix X = createMatrix(m + n, 1);   // столбец размерности m + n (в А_ m + n столбцов)
-    Matrix XB = createMatrix(m, 1);
-    Matrix XN = createMatrix(n, 1);
+    vector<int> indexX(n+m,0);   // столбец размерности m + n (в А_ m + n столбцов)
     for (int j = 0; j < m + n; ++j)
-        X[j][0] = j;    // X - столбец индексов, хз вроде он и не пригодился
-
-    for (int j = 0; j < m + n; ++j)
-    {
-        if (j < m)
-            XB[j][0] = b[j][0];
-        else
-            XN[j - m][0] = 0;
-    }
-    //Matrix Xval = createMatrix(1, m + n);
+        indexX[j] = j;    // X - столбец индексов
+    
+    
     /*
-    for (int j = 0; j < m + n; ++j)
-        Xval[0][j] = j<m ? b[0][j] : 0; // Xval - столбец значений, элементы после m-го равны 0 (по алгоритму)
-    */
-    Matrix c_copy = c;
-    Matrix A_copy = A;
+    Matrix A_ = A;
+    Matrix c_ = c;
 
+    vector<int> indexX(n, 0);   // столбец размерности m + n (в А_ m + n столбцов)
+    for (int j = 0; j < n; ++j)
+        indexX[j] = j;    // X - столбец индексов
+    */
+
+    
+    // Начало алгоритма
     //хз какое должно быть условие выхода
     while (true)
     {
-        int index = -1;
+        auto difA_ = disjoin(A_, m);    // выделим базисную матрицу
+        Matrix B = difA_.first;
+        Matrix N = difA_.second;
+
+        auto difc_ = disjoin(c_, m);    // выделим базисное решение
+        Matrix cB = difc_.first;
+        Matrix cN = difc_.second;
+
+        Matrix invB = inverse(B);   // возьмем обратную к базисной
+
+        cout << "B:" << endl;
+        cout << B << endl;
+
+        cout << "N:" << endl;
+        cout << N << endl;
+
+        cout << "cB:" << endl;
+        cout << cB << endl;
+
+        cout << "cN:" << endl;
+        cout << cN << endl;
+
+        cout << "B^-1:" << endl;
+        cout << invB << endl;
+
+        if (invB == Matrix())
+            return pair<double, Matrix>();
+
+        int indexNegative = -1;
+        Matrix d = cB * invB * N - cN;
+
+        cout << "d:" << endl;
+        cout << d << endl;
+
         // пункт 1
-        for (int i = 0; i < m; ++i)
+        for (int i = 0; i < d.size(); ++i)
         {
-            if ((c1 * inverse(E) * A_copy - c_copy)[0][i] < 0) // если все компоненты этого выражения > 0 то мы нашли оптимальный результат (см стр.2 низ)
+            if (d[0][i] < 0) // если все компоненты этого выражения > 0 то мы нашли оптимальный результат (см стр.2 низ)
             {
-                index = i; // запомнили индекс компоненты < 0
+                indexNegative = i; // запомнили индекс компоненты < 0 (ее будем изменять)
                 break;
             }
         }
-        if(index == -1)
-            return make_pair((c_copy * (XB|XN))[0][0], (XB|XN));
+        if(indexNegative == -1)
+            return ret(invB, b, c_, indexX);    // здесь надо будет еще убрать некоторые компоненты, потому что там есть искуственно введенные
 
         // пункт 2a
         
-        Matrix A_index_col = createMatrix(m, 1);
+        Matrix colIndexNegativeN = createMatrix(m, 1);  // возьмем столбец из N соответствующий изменающейся координате XN
         for(int i = 0; i < m; ++i)
-            A_index_col[i][0] = A_copy[i][index];
+            colIndexNegativeN[i][0] = N[i][indexNegative];
         vector<int> I;
         for (int i = 0; i < m; ++i)
-            if ((inverse(E) * A_index_col)[i][0] > 0) // если все компоненты данного выражения > 0, то такой индекс добавляем в I
+            if ((invB * colIndexNegativeN)[i][0] > 0) // если i-ая компонента > 0, то такой индекс добавляем в I
                 I.push_back(i);
         if (I.empty()) // если таких индексов нет, то опт. результат = +infinity (см стр. 3)
-            return make_pair(INT_MAX, XB|XN);
+            return make_pair(INT_MAX, Matrix());
+
+        cout << "I:" << endl;
+
+        for (int i = 0; i < I.size(); ++i)
+            cout << I[i] << " ";
+        cout << endl << endl;
         
         // пункт 2b
 
-        pair<double, int> min_res = min(E, b, A_index_col, I);
-        XN[index][0] = min_res.first; // изсенили компоненту по формуле 3 (см стр. 4)
-        int p = min_res.second; // запомнили индекс, на котором достигается минимум
+        int p = min(invB, b, colIndexNegativeN, I); // запомнили индекс, на котором достигается минимум(при изменении компоненты indexNegative)
 
         // переход к новой базисной матрице (см стр. 4)
 
-        vector<double> for_swap = (transpos(E))[p];
-        Matrix tE = transpos(E); // чтобю цикл не писать, лень
-        Matrix tA = transpos(A_copy);
-        tE[p] = tA[index];
-        tA[index] = for_swap;
-        E = transpos(tE);
-        A_copy = transpos(tA);
+        A_ = perCol(A_, p, m + indexNegative);
+        c_ = perCol(c_, p, m + indexNegative);
 
-        double x_swap = XB[p][0];
-        XB[p][0] = XN[index][0];
-        XN[index][0] = x_swap;
+        swap(indexX[p],indexX[m + indexNegative]);
+
+        cout << "j = " << indexNegative << endl;
+        cout << "p = " << p << endl << endl;
     }
 
-    return make_pair((c_ * (XB|XN))[0][0], XB|XN);
-    //return pair<double, Matrix>();
+    
+    return pair<double, Matrix>();
 }
 
 int main()
@@ -159,5 +207,11 @@ int main()
     cout << disjoin(C,3).first << endl;
     cout << disjoin(C,3).second << endl;*/
     
-    simplexMethod(A,b,c);
+    auto T = simplexMethod(A,b,c);
+
+    cout << "Точка максимума" << endl;
+    cout << T.second << endl;
+
+    cout << "Максимум" << endl;
+    cout << T.first << endl;
 }

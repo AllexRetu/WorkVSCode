@@ -73,11 +73,6 @@ Matrix operator+(Matrix const & A, Matrix const & B)
     return add(A, B);
 }
 
-Matrix operator-(Matrix const& A, Matrix const& B)
-{
-    return add(A, (-1)*B);
-}
-
 
 Matrix multipl(double a, Matrix const & A)  // умножение матрицы на скаляр
 {
@@ -96,6 +91,11 @@ Matrix multipl(double a, Matrix const & A)  // умножение матрицы
 Matrix operator*(double a, Matrix const & A)
 {
     return multipl(a, A);
+}
+
+Matrix operator-(Matrix const& A, Matrix const& B)
+{
+    return add(A, (-1)*B);
 }
 
 Matrix product(Matrix const & A, Matrix const & B)  // произведение матриц
@@ -324,4 +324,18 @@ std::pair<Matrix,Matrix> disjoin(Matrix const & C, size_t p) // разъделя
     }
 
     return make_pair(A,B);
+}
+
+
+Matrix subMatrixRow(Matrix const & matrix, std::vector<int> const & indexSubMatrixRow)  // возвращает подматрицу из строк исходной
+{
+    Matrix subMatrix = createMatrix(matrix.at(0).size(), indexSubMatrixRow.size());
+    for (int i = 0; i < indexSubMatrixRow.size(); ++i)
+        subMatrix[i] = matrix[indexSubMatrixRow[i]];
+    return subMatrix;
+}
+
+Matrix subMatrixCol(Matrix const & matrix, std::vector<int> const & indexSubMatrixCol)  // возвращает подматрицу из столбцов исходной
+{
+    return transpos(subMatrixRow(transpos(matrix), indexSubMatrixCol));
 }
