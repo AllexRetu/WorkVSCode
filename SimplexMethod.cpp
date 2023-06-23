@@ -165,6 +165,12 @@ pair<double, Matrix> simplexMethod(Matrix const & A, Matrix const & b, Matrix co
             if ((invB * colIndexNegativeN)[i][0] > 0) // если i-ая компонента > 0, то такой индекс добавляем в I
                 I.push_back(i);
 
+        auto point = ret(invB, b, c_, indexX);
+        cout << "Вершина в которой находимся" << endl;
+        cout << point.second << endl;
+
+        
+
         if (I.empty()) // если таких индексов нет, то опт. результат = +infinity (см стр. 3)
         {
             cout << "Все компоненты XB будут неуменьшаться." << endl;
@@ -203,6 +209,7 @@ pair<double, Matrix> simplexMethod(Matrix const & A, Matrix const & b, Matrix co
 
 int main()
 {
+    /*
     Matrix A1
     {
         {1,2,3,3},  // A
@@ -222,27 +229,47 @@ int main()
         {5,6,1,6},  // с
 
     };
+    */
 
     // система с результатом INT_MAX (+infinity)
     Matrix A2
     {
-        {1,-1,1,1},  // A
-        {1,-1,1,1},
-        {1,-1,1,1},
-
+        {1,-1,0,0,0},  // A
+        {0,1,-2,0,0},
+        {0,0,3,2,0},
+        {0,0,0,1,-3},
     },
     b2
     {
         {1,},   // b
-        {4,},
-        {1,},
+        {2,},
+        {7,},
+        {3},
 
     },
     c2
     {
-        {1,1,1,1},  // с
+        {1,1,1,1,1},  // с
 
     };
+
+    /*
+    Matrix A3
+    {
+        {1,1,0},
+        {1,0,0}
+    },
+    b3
+    {
+        {1,},
+        {2,}
+    },
+    c3
+    {
+        {-1, -1, -1},
+    };
+
+    */
     /*cout << det(A) << endl;
     cout << perRow(A,0,1) << endl;
 
@@ -258,7 +285,7 @@ int main()
 
 
     // Первые условия (существует конечный максимум)
-
+/*
     cout << "Условия первой задачи: " << endl;
     cout << "A:" << endl;
     cout << A1 << endl;
@@ -283,7 +310,7 @@ int main()
         cout << "функция не ограничена, max = +бесконечность" << endl << endl;
 
 
-
+*/
     // Вторые условия (максимум = +беск)
 
     cout << "Условия второй задачи: " << endl;
@@ -307,6 +334,30 @@ int main()
     }
     else
         cout << "функция не ограничена, max = +бесконечность" << endl;
-    
 
+    // Третье условие
+/*
+    cout << "Условия третей задачи: " << endl;
+    cout << "A:" << endl;
+    cout << A3 << endl;
+    cout << "b:" << endl;
+    cout << b3 << endl;
+    cout << "c" << endl;
+    cout << c3 << endl;
+
+    auto T3 = simplexMethod(A3,b3,c3);
+
+    if (T3.first != INT_MAX)
+    {
+            
+    cout << "Точка максимума: " << endl;
+    cout << T3.second;
+
+    cout << "Максимум:" << endl;
+    cout << T3.first << endl;
+    }
+    else
+        cout << "функция не ограничена, max = +бесконечность" << endl;
+    
+*/
 }
